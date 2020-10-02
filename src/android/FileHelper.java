@@ -97,7 +97,7 @@ public class FileHelper {
 
                 // TODO handle non-primary volumes
             }
-            // DownloadsProvider
+            /* // DownloadsProvider
             else if (isDownloadsDocument(uri)) {
 
                 final String id = DocumentsContract.getDocumentId(uri);
@@ -116,10 +116,11 @@ public class FileHelper {
                 } else {
                     return null;
                 }
-            }
+            }*/
             // MediaProvider
-            else if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
+            else if (isMediaDocument(uri) || isDownloadsDocument(uri)) {
+                String docId = DocumentsContract.getDocumentId(uri);
+                docId = docId.replace("msf:", "video:");
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
