@@ -43,6 +43,7 @@ import java.util.Locale;
 public class FileHelper {
     private static final String LOG_TAG = "FileUtils";
     private static final String _DATA = "_data";
+    private static final boolean ABOVE_ANDROID_9 = android.os.Build.VERSION.SDK_INT>= Build.VERSION_CODES.Q;
 
     /**
      * Returns the real path of the given URI string.
@@ -97,8 +98,8 @@ public class FileHelper {
 
                 // TODO handle non-primary volumes
             }
-            // DownloadsProvider
-            else if (isDownloadsDocument(uri)) {
+             // DownloadsProvider
+            else if (isDownloadsDocument(uri) && !ABOVE_ANDROID_9) {
 
                 final String id = DocumentsContract.getDocumentId(uri);
                 if (id != null && id.length() > 0) {
@@ -118,8 +119,9 @@ public class FileHelper {
                 }
             }
             // MediaProvider
-            else if (isMediaDocument(uri)) {
-                final String docId = DocumentsContract.getDocumentId(uri);
+            else if (isMediaDocument(uri) || isDownloadsDocument(uri)) {
+                String docId = DocumentsContract.getDocumentId(uri);
+                docId = docId.replace("msf:", "video:");
                 final String[] split = docId.split(":");
                 final String type = split[0];
 
