@@ -26,11 +26,13 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+import android.provider.OpenableColumns;
 import android.webkit.MimeTypeMap;
 
 import org.apache.cordova.CordovaInterface;
 import org.apache.cordova.LOG;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -127,6 +129,37 @@ public class FileHelper {
                     contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
                 } else if ("audio".equals(type)) {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                } else if ("document".equals(type)) {
+
+                    String filename = null;
+//                    String mimeType = context.getContentResolver().getType(uri);
+//                    if (mimeType == null) {
+//                        String path = getPath(context, uri);
+//                        if (path == null) {
+////                            filename = FilenameUtils.getName(uri.toString());
+//                        } else {
+//                            File file = new File(path);
+//                            filename = file.getName();
+//                        }
+//                    } else {
+                    Uri returnUri = uri;
+                    Cursor returnCursor = context.getContentResolver().query(returnUri, null, null, null, null);
+                    int nameIndex = returnCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    int sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE);
+                    returnCursor.moveToFirst();
+                    filename = returnCursor.getString(nameIndex);
+                    String size = Long.toString(returnCursor.getLong(sizeIndex));
+//                    }
+                    File fileSave = context.getExternalFilesDir(null);
+                    String sourcePath = context.getExternalFilesDir(null).toString();
+                    File file = new File(sourcePath + "/" + filename);
+                    try {
+                        copyFileStream(file, uri, context);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return file.getAbsolutePath();
                 }
 
                 final String selection = "_id=?";
@@ -136,6 +169,7 @@ public class FileHelper {
 
                 return getDataColumn(context, contentUri, selection, selectionArgs);
             }
+        }
         // MediaStore (and general)
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
 
